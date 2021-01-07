@@ -1,6 +1,6 @@
-package org.jetbrains.plugins.template.services
+package com.github.vitorm3lo.jbossplugin.services
 
-import org.jetbrains.plugins.template.MyBundle
+import com.github.vitorm3lo.jbossplugin.MyBundle
 
 class MyApplicationService {
 

@@ -1,7 +1,7 @@
-package org.jetbrains.plugins.template.services
+package com.github.vitorm3lo.jbossplugin.services
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.plugins.template.MyBundle
+import com.github.vitorm3lo.jbossplugin.MyBundle
 
 class MyProjectService(project: Project) {
 
