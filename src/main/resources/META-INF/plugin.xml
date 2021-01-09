@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>com.github.vitorm3lo.jbossplugin</id>
-    <name>Jboss-plugin</name>
+    <name>Jboss</name>
     <vendor>vitorm3lo</vendor>
 
     <!-- Product and plugin compatibility requirements -->
@@ -8,12 +8,8 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.vitorm3lo.jbossplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.vitorm3lo.jbossplugin.services.MyProjectService"/>
+        <toolWindow id="Servers" secondary="true" anchor="right" icon="AllIcons.General.Modified" factoryClass="com.github.vitorm3lo.jbossplugin.JBossWindowFactory"/>
+        <applicationService serviceImplementation="com.github.vitorm3lo.jbossplugin.services.PersistenceService"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.vitorm3lo.jbossplugin.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>
