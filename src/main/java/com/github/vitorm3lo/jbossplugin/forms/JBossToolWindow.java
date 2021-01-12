@@ -1,11 +1,8 @@
 package com.github.vitorm3lo.jbossplugin.forms;
 
+import com.github.vitorm3lo.jbossplugin.listeners.ProjectListener;
 import com.github.vitorm3lo.jbossplugin.model.Instance;
-import com.github.vitorm3lo.jbossplugin.model.InstanceState;
 import com.github.vitorm3lo.jbossplugin.services.PersistenceService;
-import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
@@ -24,25 +21,30 @@ public class JBossToolWindow {
 
     private List<Instance> instanceList;
     private final PersistenceService persistenceService;
+    private final ProjectListener projectListener;
 
-    public JBossToolWindow(ToolWindow toolWindow) {
+    public JBossToolWindow() {
         if (instanceList == null) {
             instanceList = new ArrayList<>();
         }
+
+        projectListener = ProjectListener.getInstance();
 
         persistenceService = PersistenceService.getInstance();
         // restore data
         if (persistenceService.getState() != null) {
             instanceList.addAll(
-                    persistenceService.getState().instanceState.stream().map(
-                            is -> new Instance(is.serverName, new File(is.serverPath), is.deployablePath.stream()
-                                    .map(File::new).collect(Collectors.toList())))
-                            .collect(Collectors.toList()));
+                    persistenceService.getState().instanceState.stream().map(is ->
+                            new Instance(is.serverName, new File(is.serverPath), is.deployablePath.stream()
+                                    .map(File::new).collect(Collectors.toList()))
+                    ).collect(Collectors.toList()));
         }
 
         for (Instance i : instanceList) {
-            JPanel row = new ServerRow(i).getServerRow();
+            ServerRow serverRow = new ServerRow(i);
+            JPanel row = serverRow.getServerRow();
             row.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+            projectListener.addRow(serverRow);
             scrollPanel.add(row);
             scrollPanel.revalidate();
             scrollPanel.repaint();
@@ -53,10 +55,12 @@ public class JBossToolWindow {
             Instance instance = dialog.showDialog();
             if (instance.getServerPath() != null && instance.getDeployablePath() != null && instance.getDeployablePath().size() > 0) {
                 instanceList.add(instance);
-                // save data after creating new - TODO: place in a new method to ease adding and removing
-                updateInstancesState();
-                JPanel row = new ServerRow(instance).getServerRow();
+                // save data after creating new
+                persistenceService.updateInstancesState(instanceList);
+                ServerRow serverRow = new ServerRow(instance);
+                JPanel row = serverRow.getServerRow();
                 row.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+                projectListener.addRow(serverRow);
                 scrollPanel.add(row);
                 scrollPanel.revalidate();
                 scrollPanel.repaint();
@@ -77,21 +81,9 @@ public class JBossToolWindow {
                         }
                     }
                 }
-                updateInstancesState();
+                persistenceService.updateInstancesState(instanceList);
             }
         });
-    }
-
-    private void updateInstancesState() {
-        if (persistenceService.getState() != null) {
-            if (persistenceService.getState().instanceState == null) {
-                persistenceService.getState().instanceState = new ArrayList<>();
-            }
-            persistenceService.getState().instanceState =
-                    instanceList.stream().map(i ->
-                            new InstanceState(i.getServerName(), i.getServerPath(), i.getDeployablePath()))
-                            .collect(Collectors.toList());
-        }
     }
 
     public JPanel getContent() {

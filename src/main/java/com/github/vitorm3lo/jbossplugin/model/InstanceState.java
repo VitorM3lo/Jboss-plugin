@@ -11,16 +11,20 @@ public class InstanceState {
     public List<String> deployablePath;
 
     public InstanceState() {
+        serverPath = "";
+        serverName = "";
+        deployablePath = new ArrayList<>();
     }
 
     public InstanceState(String serverName, File serverPath, List<File> deployablePath) {
         this.serverName = serverName;
         this.serverPath = serverPath.getAbsolutePath();
-        if(this.deployablePath == null) {
+        if (this.deployablePath == null) {
             this.deployablePath = new ArrayList<>();
         }
         for (File deployable : deployablePath) {
             this.deployablePath.add(deployable.getAbsolutePath());
         }
     }
+
 }

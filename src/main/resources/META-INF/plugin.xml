@@ -12,4 +12,8 @@
         <applicationService serviceImplementation="com.github.vitorm3lo.jbossplugin.services.PersistenceService"/>
     </extensions>
 
+    <projectListeners>
+        <listener class="com.github.vitorm3lo.jbossplugin.listeners.ProjectListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </projectListeners>
+
 </idea-plugin>
