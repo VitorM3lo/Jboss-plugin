@@ -62,7 +62,8 @@
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="2" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="JBoss Deployable folder:"/>
+              <text value="JBoss Deployable folder: (ex: standalone/deployments/)"/>
+              <toolTipText value="After setting the deployable folder the tool will find automatically the sandalone.bat to run the server.  Example of a deployable folder: ...\jboss-eap-7.3\standalone\deployments"/>
             </properties>
           </component>
           <component id="3e59f" class="javax.swing.JLabel">
@@ -85,7 +86,9 @@
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <toolTipText value="After setting the deployable folder the tool will find automatically the sandalone.bat to run the server.  Example of a deployable folder: ...\jboss-eap-7.3\standalone\deployments"/>
+            </properties>
           </component>
           <vspacer id="d08a6">
             <constraints>

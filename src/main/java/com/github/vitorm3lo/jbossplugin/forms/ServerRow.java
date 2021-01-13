@@ -2,19 +2,22 @@ package com.github.vitorm3lo.jbossplugin.forms;
 
 import com.github.vitorm3lo.jbossplugin.model.Instance;
 import com.github.vitorm3lo.jbossplugin.services.CommandLineService;
-import com.github.vitorm3lo.jbossplugin.services.PersistenceService;
-import com.intellij.execution.process.OSProcessHandler;
+import com.github.vitorm3lo.jbossplugin.services.DebugWindowService;
+import com.github.vitorm3lo.jbossplugin.utils.ProjectUtil;
+import com.intellij.execution.configurations.RemoteConnection;
 import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.ui.BaseContentCloseListener;
-import com.intellij.execution.ui.RunContentManagerImpl;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.project.ProjectManagerListener;
-import com.intellij.openapi.project.VetoableProjectManagerListener;
-import com.intellij.openapi.project.impl.ProjectManagerImpl;
+import com.intellij.openapi.wm.WindowManager;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class ServerRow extends JComponent {
     private JButton debugButton;
@@ -25,7 +28,6 @@ public class ServerRow extends JComponent {
 
     private final Instance instance;
     private ProcessHandler runProcessHandler;
-    private ProcessHandler debugProcessHandler;
     private final CommandLineService commandLineService = new CommandLineService();
 
     public ServerRow(Instance instance) {
@@ -34,15 +36,9 @@ public class ServerRow extends JComponent {
         this.instance = instance;
         deployServer();
 
-        runButton.addActionListener(e -> {
-            runServer();
-        });
-        debugButton.addActionListener(e -> {
-            startDebugSession();
-        });
-        deployButton.addActionListener(e -> {
-            deployServer();
-        });
+        runButton.addActionListener(e -> runServer());
+        debugButton.addActionListener(e -> startDebugSession());
+        deployButton.addActionListener(e -> deployServer());
     }
 
     public JPanel getServerRow() {
@@ -50,7 +46,13 @@ public class ServerRow extends JComponent {
     }
 
     private void deployServer() {
-        
+        for (File deployable : instance.getDeployablePath()) {
+            try {
+                Files.copy(Paths.get(deployable.toURI()), Paths.get(instance.getServerPath().getAbsolutePath(), deployable.getName()), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void runServer() {
@@ -59,24 +61,22 @@ public class ServerRow extends JComponent {
             runButton.setText("Run");
             return;
         }
-        runProcessHandler = commandLineService.runServer("C:\\Users\\Vitor\\Downloads\\jboss-eap-7.3.0\\jboss-eap-7.3\\bin\\standalone.bat", instance.getServerName());
+        Path jbossPath = Paths.get(instance.getServerPath().getParentFile().getParentFile().getAbsolutePath(), "bin/", "standalone.bat");
+        if (!jbossPath.toFile().exists()) {
+            JOptionPane.showMessageDialog(null,
+                    "It's required a jboss standalone.bat.",
+                    "No runnable",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        runProcessHandler = commandLineService.runServer(jbossPath.toAbsolutePath().toString(), instance.getServerName(), ProjectUtil.getActiveProject());
         runButton.setText("Stop");
     }
 
     private void startDebugSession() {
-        if (runProcessHandler == null || runProcessHandler.isProcessTerminated()) {
-            JOptionPane.showMessageDialog(null,
-                    "It's required a running server.",
-                    "No server running",
-                    JOptionPane.WARNING_MESSAGE);
-        }
-        if (debugProcessHandler != null && !debugProcessHandler.isProcessTerminated()) {
-            debugProcessHandler.destroyProcess();
-            debugButton.setText("Debug");
-            return;
-        }
-        debugProcessHandler = commandLineService.debugServer("java -Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n", instance.getServerName() + " - Debug");
-        debugButton.setText("Stop debug");
+        DebugWindowService.attach(ProjectUtil.getActiveProject(),
+                new RemoteConnection(true, "localhost", "8787", false),
+                instance.getServerName());
     }
 
     public ProcessHandler getRunProcessHandler() {

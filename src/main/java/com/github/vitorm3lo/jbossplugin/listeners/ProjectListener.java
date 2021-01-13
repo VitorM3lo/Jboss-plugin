@@ -1,9 +1,7 @@
 package com.github.vitorm3lo.jbossplugin.listeners;
 
 import com.github.vitorm3lo.jbossplugin.forms.ServerRow;
-import com.intellij.execution.process.ProcessHandler;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerListener;
 import org.jetbrains.annotations.NotNull;
 

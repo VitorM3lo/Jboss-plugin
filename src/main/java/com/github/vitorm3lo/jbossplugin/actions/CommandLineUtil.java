@@ -13,11 +13,9 @@ import javax.annotation.Nullable;
 
 public class CommandLineUtil {
 
-    public static final String DEBUG_CONSOLE = "Debug";
-    public static final String RUN_CONSOLE = "Terminal";
     public static String DISPLAY_NAME = "CustomCommand";
     // open in integrated terminal tool window
-    public static String CUSTOM_CONSOLE = "Terminal";
+    public static String CUSTOM_CONSOLE = "Servers Console";
 
     @Nullable
     public static Content getConsoleViewContent(Project project) {
@@ -39,19 +37,14 @@ public class CommandLineUtil {
         ConsoleView consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
         Content[] contents = toolWindow.getContentManager().getContents();
         for (Content content : contents) {
-            if(content.getDisplayName().equals(DISPLAY_NAME)) {
+            if (content.getDisplayName().equals(DISPLAY_NAME)) {
                 return content;
             }
         }
         Content newConent =
                 toolWindow.getContentManager().getFactory().createContent(consoleView.getComponent(), DISPLAY_NAME, false);
 
-        // I don't know why this throws a null pointer the first time and the second time does not
-        try {
-            toolWindow.getContentManager().addContent(newConent);
-        } catch (NullPointerException e) {
-//            toolWindow.getContentManager().addContent(newConent);
-        }
+        toolWindow.getContentManager().addContent(newConent);
 
         return newConent;
     }
@@ -66,7 +59,7 @@ public class CommandLineUtil {
         Content content = getConsoleViewContent(project);
         ToolWindow toolWindow = getToolWindow(project);
         if (content != null && toolWindow != null) {
-            toolWindow.show();
+            toolWindow.show(null);
             toolWindow.getContentManager().setSelectedContent(content);
         }
     }

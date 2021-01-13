@@ -2,18 +2,19 @@
     <id>com.github.vitorm3lo.jbossplugin</id>
     <name>Jboss</name>
     <vendor>vitorm3lo</vendor>
+    <description>Small Jboss plugin for Intellij, for deploying, running and debugging apps</description>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Servers" secondary="true" anchor="right" icon="AllIcons.General.Modified" factoryClass="com.github.vitorm3lo.jbossplugin.JBossWindowFactory"/>
         <applicationService serviceImplementation="com.github.vitorm3lo.jbossplugin.services.PersistenceService"/>
+        <programRunner
+                implementation="com.github.vitorm3lo.jbossplugin.services.DebugWindowService$ProcessAttachDebuggerRunner"/>
+        <toolWindow factoryClass="com.github.vitorm3lo.jbossplugin.toolwindows.ServerPanelFactory" id="Servers Console" secondary="true" anchor="bottom"/>
     </extensions>
-
-    <projectListeners>
-        <listener class="com.github.vitorm3lo.jbossplugin.listeners.ProjectListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </projectListeners>
 
 </idea-plugin>

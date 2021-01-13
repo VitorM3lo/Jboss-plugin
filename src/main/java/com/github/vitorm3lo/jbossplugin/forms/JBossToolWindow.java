@@ -3,6 +3,14 @@ package com.github.vitorm3lo.jbossplugin.forms;
 import com.github.vitorm3lo.jbossplugin.listeners.ProjectListener;
 import com.github.vitorm3lo.jbossplugin.model.Instance;
 import com.github.vitorm3lo.jbossplugin.services.PersistenceService;
+import com.github.vitorm3lo.jbossplugin.utils.ProjectUtil;
+import com.intellij.execution.ui.BaseContentCloseListener;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.externalSystem.service.project.autoimport.ProjectStatus;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerListener;
+import com.intellij.openapi.project.impl.ProjectLifecycleListener;
+import com.intellij.refactoring.listeners.RefactoringEventListener;
 import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
@@ -29,6 +37,7 @@ public class JBossToolWindow {
         }
 
         projectListener = ProjectListener.getInstance();
+        ApplicationManager.getApplication().getMessageBus().connect().subscribe(ProjectManager.TOPIC, projectListener);
 
         persistenceService = PersistenceService.getInstance();
         // restore data
