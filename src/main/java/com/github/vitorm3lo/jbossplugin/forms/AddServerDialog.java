@@ -125,6 +125,7 @@ public class AddServerDialog extends JDialog {
                         "Choose a different name for easy identification",
                         "Equal server name",
                         JOptionPane.WARNING_MESSAGE);
+                return;
             }
         } else {
             if (!instance.getServerName().equals(serverNameField.getText()) && this.serverNames != null && serverNames.contains(this.serverNameField.getText())) {
@@ -132,6 +133,7 @@ public class AddServerDialog extends JDialog {
                         "Choose a different name for easy identification",
                         "Equal server name",
                         JOptionPane.WARNING_MESSAGE);
+                return;
             }
         }
 
@@ -158,10 +160,12 @@ public class AddServerDialog extends JDialog {
         } else {
             int port = -1;
             try {
-                port = Integer.parseInt(debugPortTextField.getText());
+                if (!debugPortTextField.getText().isEmpty()) {
+                    port = Integer.parseInt(debugPortTextField.getText());
+                }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null,
-                        "Debug port format is wrong, introduce a number",
+                        "Debug port format is wrong, introduce a number (-1 - disable debug mode)",
                         "Debug port error",
                         JOptionPane.WARNING_MESSAGE);
             }
@@ -169,7 +173,7 @@ public class AddServerDialog extends JDialog {
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(null,
-                        "Debug port too low, insert a port between 1024 and 65535",
+                        "Debug port too low, insert a port between 1024 and 65535 or -1 to disable debug mode",
                         "Debug port error",
                         JOptionPane.WARNING_MESSAGE);
             }

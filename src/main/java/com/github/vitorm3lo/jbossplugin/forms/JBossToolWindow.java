@@ -91,8 +91,8 @@ public class JBossToolWindow {
 
     private void updateList(List<Instance> instanceList) {
         Component[] components = scrollPanel.getComponents();
-        for (int i = 0; i < components.length; i++) {
-            scrollPanel.remove(i);
+        for (Component component : components) {
+            scrollPanel.remove(component);
         }
         for (Instance i : instanceList) {
             ServerRow serverRow = new ServerRow(i);

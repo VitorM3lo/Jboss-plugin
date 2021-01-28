@@ -146,6 +146,7 @@
             </constraints>
             <properties>
               <text value="8787"/>
+              <toolTipText value="Number between 1024 and 65535. -1 to disable debug mode (not required)"/>
             </properties>
           </component>
           <component id="a9f74" class="javax.swing.JButton" binding="searchButton" default-binding="true">
@@ -166,6 +167,7 @@
             </constraints>
             <properties>
               <text value="Debug port:"/>
+              <toolTipText value="Number between 1024 and 65535. -1 to disable debug mode (not required)"/>
             </properties>
           </component>
         </children>
