@@ -3,14 +3,8 @@ package com.github.vitorm3lo.jbossplugin.forms;
 import com.github.vitorm3lo.jbossplugin.listeners.ProjectListener;
 import com.github.vitorm3lo.jbossplugin.model.Instance;
 import com.github.vitorm3lo.jbossplugin.services.PersistenceService;
-import com.github.vitorm3lo.jbossplugin.utils.ProjectUtil;
-import com.intellij.execution.ui.BaseContentCloseListener;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.externalSystem.service.project.autoimport.ProjectStatus;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.project.ProjectManagerListener;
-import com.intellij.openapi.project.impl.ProjectLifecycleListener;
-import com.intellij.refactoring.listeners.RefactoringEventListener;
 import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
@@ -26,6 +20,7 @@ public class JBossToolWindow {
     private JScrollPane scrollPane;
     private JPanel scrollPanel;
     private JButton removeJBossServerButton;
+    private JButton editJBossServerButton;
 
     private List<Instance> instanceList;
     private final PersistenceService persistenceService;
@@ -44,20 +39,12 @@ public class JBossToolWindow {
         if (persistenceService.getState() != null) {
             instanceList.addAll(
                     persistenceService.getState().instanceState.stream().map(is ->
-                            new Instance(is.serverName, new File(is.serverPath), is.deployablePath.stream()
+                            new Instance(is.serverName, is.debugPort, new File(is.serverPath), is.deployablePath.stream()
                                     .map(File::new).collect(Collectors.toList()))
                     ).collect(Collectors.toList()));
         }
 
-        for (Instance i : instanceList) {
-            ServerRow serverRow = new ServerRow(i);
-            JPanel row = serverRow.getServerRow();
-            row.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
-            projectListener.addRow(serverRow);
-            scrollPanel.add(row);
-            scrollPanel.revalidate();
-            scrollPanel.repaint();
-        }
+        updateList(instanceList);
 
         addJBossServerButton.addActionListener(e -> {
             AddServerDialog dialog = new AddServerDialog(instanceList.stream().map(Instance::getServerName).collect(Collectors.toList()));
@@ -93,6 +80,29 @@ public class JBossToolWindow {
                 persistenceService.updateInstancesState(instanceList);
             }
         });
+
+        editJBossServerButton.addActionListener(e -> {
+            EditServerDialog dialog = new EditServerDialog(instanceList);
+            dialog.showDialog();
+            persistenceService.updateInstancesState(instanceList);
+            updateList(instanceList);
+        });
+    }
+
+    private void updateList(List<Instance> instanceList) {
+        Component[] components = scrollPanel.getComponents();
+        for (int i = 0; i < components.length; i++) {
+            scrollPanel.remove(i);
+        }
+        for (Instance i : instanceList) {
+            ServerRow serverRow = new ServerRow(i);
+            JPanel row = serverRow.getServerRow();
+            row.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+            projectListener.addRow(serverRow);
+            scrollPanel.add(row);
+            scrollPanel.revalidate();
+            scrollPanel.repaint();
+        }
     }
 
     public JPanel getContent() {

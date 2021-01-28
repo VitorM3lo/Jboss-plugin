@@ -34,7 +34,6 @@ public class ServerRow extends JComponent {
         super();
         serverNameLabel.setText(instance.getServerName());
         this.instance = instance;
-        deployServer();
 
         runButton.addActionListener(e -> runServer());
         debugButton.addActionListener(e -> startDebugSession());
@@ -46,12 +45,28 @@ public class ServerRow extends JComponent {
     }
 
     private void deployServer() {
+        boolean hasError = false;
+        File dir = new File(instance.getServerPath().getAbsolutePath());
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".ear") || name.endsWith(".war") || name.endsWith(".jar"));
+        for (File file : files) {
+            try {
+                Files.delete(Paths.get(file.toURI()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         for (File deployable : instance.getDeployablePath()) {
             try {
                 Files.copy(Paths.get(deployable.toURI()), Paths.get(instance.getServerPath().getAbsolutePath(), deployable.getName()), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
+                hasError = true;
                 e.printStackTrace();
             }
+        }
+        if (hasError) {
+            JOptionPane.showMessageDialog(null, "Some files were not deployed", "Error deploying", JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Files deployed!", "", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -69,13 +84,20 @@ public class ServerRow extends JComponent {
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
-        runProcessHandler = commandLineService.runServer(jbossPath.toAbsolutePath().toString(), instance.getServerName(), ProjectUtil.getActiveProject());
+        runProcessHandler = commandLineService.runServer(jbossPath.toAbsolutePath().toString(), instance.getServerName(), instance.getDebugPort(), ProjectUtil.getActiveProject());
         runButton.setText("Stop");
     }
 
     private void startDebugSession() {
+        if (instance.getDebugPort() == -1) {
+            JOptionPane.showMessageDialog(null,
+                    "Debug port is not set, debug session stopped",
+                    "Debug port error",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         DebugWindowService.attach(ProjectUtil.getActiveProject(),
-                new RemoteConnection(true, "localhost", "8787", false),
+                new RemoteConnection(true, "localhost", "" + instance.getDebugPort(), false),
                 instance.getServerName());
     }
 

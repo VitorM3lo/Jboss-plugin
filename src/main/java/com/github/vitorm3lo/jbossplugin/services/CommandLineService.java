@@ -12,14 +12,16 @@ import java.util.ArrayList;
 
 public class CommandLineService {
 
-    public ProcessHandler runServer(String jbossPath, String serverName, Project activeProject) {
+    public ProcessHandler runServer(String jbossPath, String serverName, int debugPort, Project activeProject) {
         ArrayList<String> cmds = new ArrayList<>();
         cmds.add("cmd");
         cmds.add("start");
         cmds.add("");
         cmds.add(jbossPath);
-        cmds.add("--debug");
-        cmds.add("8787");
+        if (debugPort != -1) {
+            cmds.add("--debug");
+            cmds.add("" + debugPort);
+        }
 
         if (activeProject == null) {
             return null;

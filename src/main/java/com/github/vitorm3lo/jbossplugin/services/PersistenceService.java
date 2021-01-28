@@ -36,7 +36,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceS
                 getState().instanceState = new ArrayList<>();
             }
             getState().instanceState = instanceList.stream().map(i ->
-                    new InstanceState(i.getServerName(), i.getServerPath(), i.getDeployablePath()))
+                    new InstanceState(i.getServerName(), i.getDebugPort(), i.getServerPath(), i.getDeployablePath()))
                     .collect(Collectors.toList());
         }
     }

@@ -23,11 +23,24 @@ public class AddServerDialog extends JDialog {
     private JButton removeButton;
     private JButton addButton;
     private JTextField serverNameField;
+    private JTextField debugPortTextField;
 
     private File deployableFolder;
-    private final List<File> deployableFiles;
+    private List<File> deployableFiles;
     private DefaultListModel<String> listModel;
     private final List<String> serverNames;
+    private Instance instance;
+
+    public AddServerDialog(List<String> names, Instance instance) {
+        this(names);
+        this.instance = instance;
+        debugPortTextField.setText(instance.getDebugPort() + "");
+        serverNameField.setText(instance.getServerName());
+        textField1.setText(instance.getServerPath().getAbsolutePath());
+        listModel.addAll(instance.getDeployablePath().stream().map(File::getAbsolutePath).collect(Collectors.toList()));
+        deployableFolder = instance.getServerPath();
+        deployableFiles = instance.getDeployablePath();
+    }
 
     public AddServerDialog(List<String> names) {
         deployableFiles = new ArrayList<>();
@@ -70,7 +83,7 @@ public class AddServerDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 int[] selected = deployableList.getSelectedIndices();
                 for (int index : selected) {
-                    deployableList.remove(index);
+                    listModel.remove(index);
                 }
             }
         });
@@ -106,20 +119,27 @@ public class AddServerDialog extends JDialog {
     }
 
     private void onOK() {
+        if (instance == null) {
+            if (this.serverNames != null && serverNames.contains(this.serverNameField.getText())) {
+                JOptionPane.showMessageDialog(null,
+                        "Choose a different name for easy identification",
+                        "Equal server name",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            if (!instance.getServerName().equals(serverNameField.getText()) && this.serverNames != null && serverNames.contains(this.serverNameField.getText())) {
+                JOptionPane.showMessageDialog(null,
+                        "Choose a different name for easy identification",
+                        "Equal server name",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        }
+
         if (this.serverNameField == null || this.serverNameField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null,
                     "It's required a server name.",
                     "No server name",
                     JOptionPane.WARNING_MESSAGE);
-        } else if (this.serverNames != null) {
-            if (serverNames.contains(this.serverNameField.getText())) {
-                JOptionPane.showMessageDialog(null,
-                        "Choose a different name for easy identification",
-                        "Equal server name",
-                        JOptionPane.WARNING_MESSAGE);
-            } else {
-                dispose();
-            }
         } else if (deployableFolder == null) {
             JOptionPane.showMessageDialog(null,
                     "It's required a deployable folder.",
@@ -130,8 +150,29 @@ public class AddServerDialog extends JDialog {
                     "It's required at least one deployable file.",
                     "No deployable file",
                     JOptionPane.WARNING_MESSAGE);
+        } else if (debugPortTextField.getText() == null || debugPortTextField.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "It's required a debug port.",
+                    "No debug port",
+                    JOptionPane.WARNING_MESSAGE);
         } else {
-            dispose();
+            int port = -1;
+            try {
+                port = Integer.parseInt(debugPortTextField.getText());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Debug port format is wrong, introduce a number",
+                        "Debug port error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+            if (port > 1024 && port < 65535 || port == -1) {
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null,
+                        "Debug port too low, insert a port between 1024 and 65535",
+                        "Debug port error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
 
@@ -139,7 +180,7 @@ public class AddServerDialog extends JDialog {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
-        return new Instance(this.serverNameField.getText(), deployableFolder, deployableFiles);
+        return new Instance(this.serverNameField.getText(), Integer.parseInt(debugPortTextField.getText()), deployableFolder, deployableFiles);
     }
 
     private void onCancel() {
