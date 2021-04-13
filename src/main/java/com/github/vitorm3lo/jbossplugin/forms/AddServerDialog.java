@@ -83,7 +83,10 @@ public class AddServerDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 int[] selected = deployableList.getSelectedIndices();
                 for (int index : selected) {
-                    listModel.remove(index);
+                    final String deployablePath = listModel.remove(index);
+                    if (deployableFiles != null && !deployableFiles.isEmpty()) {
+                        deployableFiles = deployableFiles.stream().filter(d -> !d.getAbsolutePath().equals(deployablePath)).collect(Collectors.toList());
+                    }
                 }
             }
         });
