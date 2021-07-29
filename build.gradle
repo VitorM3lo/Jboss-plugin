@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'com.github.vitorm3lo'
-version '0.0.4'
+version '0.0.5'
 
 sourceCompatibility = 1.8
 
@@ -29,5 +29,4 @@ buildSearchableOptions {
 patchPluginXml {
     version = project.version
     sinceBuild = "192.*"
-    untilBuild ="211.*"
 }
